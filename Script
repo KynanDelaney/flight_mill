@@ -2,34 +2,40 @@ from mcp3208 import MCP3208
 from time import sleep
 import datetime
 import os
+import csv
+
+filename = "data_log.csv"
+# Create header row in new CSV file
+csv = open(filename, 'w')
+csv.write("Timestamp,CH0,CH1,CH2,CH3,CH4,CH5,CH6,CH7\n")
+csv.close
 
 mcp = MCP3208()
 
-print(' Time | {0:>4} | {1:>4} | {2:>4} | {3:>4} | {4:>4} | {5:>4} | {6:>4} | {7:>4} |'.format(*range(8)))
-print('-' * 57)
-
 # Main program loop.
 while True:
-    results = ""
     # Read all the ADC channel values in a list.
     values = [0] * 8
     for i in range(8):
         # The mcp.read function will get the value of the specified channel (0-7).
         values[i] = mcp.read(i)
-
-        results = results + str(values[i]) + ","
-
-    results = results + "\n"
     # Get timestamp and convert it to a character string to add to printed output.
     stamp = datetime.datetime.now()
     ts = stamp.strftime("%d/%m %H:%M:%S")
-    # Print recorded values and timestamp.
-    print(ts +"| {0:>4} | {1:>4} | {2:>4} | {3:>4} | {4:>4} | {5:>4} | {6:>4} | {7:>4} |".format(*values))
+    # Write recorded values and timestamp.
+    entry = ts + "," + .format(*values) + "\n"
+
+    # Log (append) entry into file
+    csv = open(filename, 'a')
+    try:
+        csv.write(entry)
+    finally:
+        csv.close()
+
     # Pause for a tenth of a second.
     sleep(0.1)
 
-    with open("/home/pi/data_log.csv", "a") as file:
-        if os.stat("/home/pi/data_log.csv").st_size == 0:
-            file.write("CH0,CH1,CH2,CH3,CH4,CH5,CH6,CH7\n")
-        file.write(ts + results)
-        time.sleep(1)
+# When all the writing has been completed, print the CSV contents
+csv = open(filename, 'r')
+print(csv.read())
+csv.close()
