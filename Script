@@ -5,9 +5,10 @@ import csv
 
 mcp = MCP3208()
 
+# Create object of today's date
 today = str(datetime.date.today().strftime("%d-%m"))
 
-# Create/Open csv. Write headers and close.
+# Create/Open csv. Write headers and close. Named for today's date.
 with open(today + "datalog.csv", "a") as log:
     log.write("Time, CH0,CH1,CH2,CH3,CH4,CH5,CH6,CH7\n")
 log.close
